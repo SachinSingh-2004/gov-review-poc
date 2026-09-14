@@ -23,6 +23,7 @@ import { PageHeader } from '../components/PageHeader';
 import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
 import { SeverityBadge } from '../components/SeverityBadge';
+import { EvidenceUploader } from '../components/EvidenceUploader';
 import { useAuth } from '../context/AuthContext';
 
 export const Findings: React.FC = () => {
@@ -95,15 +96,34 @@ export const Findings: React.FC = () => {
     return true;
   });
 
+  const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+
   const columns: Column<Finding>[] = [
     { id: 'code', label: 'Finding Code', minWidth: 110 },
-    { id: 'title', label: 'Finding Description / Title', minWidth: 240 },
-    { id: 'audit_title', label: 'Associated Audit', minWidth: 180 },
-    { id: 'project_name', label: 'Project', minWidth: 150 },
+    { id: 'title', label: 'Finding Description / Title', minWidth: 220 },
+    { id: 'audit_title', label: 'Associated Audit', minWidth: 170 },
+    { id: 'project_name', label: 'Project', minWidth: 140 },
     { id: 'severity', label: 'Severity', minWidth: 110, format: (val) => <SeverityBadge severity={val} /> },
-    { id: 'owner_name', label: 'Owner', minWidth: 140 },
+    { id: 'owner_name', label: 'Owner', minWidth: 130 },
     { id: 'status', label: 'Status', minWidth: 120, format: (val) => <StatusChip status={val} /> },
-    { id: 'due_date', label: 'Due Date', minWidth: 110 },
+    {
+      id: 'actions',
+      label: 'Evidence / Details',
+      minWidth: 150,
+      format: (_, row) => (
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            setSelectedFinding(row);
+            setOpenDetail(true);
+          }}
+        >
+          View Evidence
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -265,6 +285,47 @@ export const Findings: React.FC = () => {
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      {/* Finding Evidence & Detail Dialog */}
+      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
+        {selectedFinding && (
+          <Box>
+            <DialogTitle fontWeight={700}>
+              [{selectedFinding.code}] {selectedFinding.title}
+            </DialogTitle>
+            <DialogContent dividers>
+              <Box mb={2}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                  NON-CONFORMANCE DESCRIPTION
+                </Typography>
+                <Typography variant="body1" mt={0.5}>
+                  {selectedFinding.description || 'No additional description provided.'}
+                </Typography>
+              </Box>
+              <Box mb={2} display="flex" gap={2}>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">SEVERITY</Typography>
+                  <SeverityBadge severity={selectedFinding.severity} />
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">STATUS</Typography>
+                  <StatusChip status={selectedFinding.status} />
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">OWNER</Typography>
+                  <Typography variant="body2" fontWeight={600}>{selectedFinding.owner_name || 'Unassigned'}</Typography>
+                </Box>
+              </Box>
+
+              {/* Evidence Uploader Component for Finding */}
+              <EvidenceUploader entityType="FINDING" entityId={selectedFinding.id} />
+            </DialogContent>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+              <Button onClick={() => setOpenDetail(false)}>Close</Button>
+            </DialogActions>
+          </Box>
+        )}
       </Dialog>
     </Box>
   );

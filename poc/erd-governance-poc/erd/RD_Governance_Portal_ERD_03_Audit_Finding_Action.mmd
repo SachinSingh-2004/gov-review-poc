@@ -1,0 +1,77 @@
+erDiagram
+    %% Module 03: Audit, Finding, Action & Evidence
+    PROJECT ||--o{ AUDIT : "audited by"
+    USER ||--o{ AUDIT : "leads as Lead Auditor"
+    AUDIT ||--o{ AUDIT_PARTICIPANT : "includes"
+    USER ||--o{ AUDIT_PARTICIPANT : "participates in"
+
+    AUDIT ||--o{ FINDING : "produces"
+    USER ||--o{ FINDING : "owns"
+
+    FINDING ||--o{ ACTION : "requires corrective"
+    USER ||--o{ ACTION : "owns action"
+    USER ||--o{ ACTION : "reviews action"
+
+    ACTION ||--o{ EVIDENCE : "supported by"
+    USER ||--o{ EVIDENCE : "uploaded by"
+    USER ||--o{ EVIDENCE : "reviewed by"
+
+    AUDIT {
+        string audit_id PK
+        string code
+        string title
+        string project_id FK
+        string lead_auditor_id FK
+        date start_date
+        date end_date
+        string status
+        string audit_type
+        string scope_description
+    }
+
+    AUDIT_PARTICIPANT {
+        string audit_id PK, FK
+        string user_id PK, FK
+        string role_in_audit
+    }
+
+    FINDING {
+        string finding_id PK
+        string code
+        string audit_id FK
+        string title
+        string description
+        string severity
+        string status
+        string owner_id FK
+        date due_date
+    }
+
+    ACTION {
+        string action_id PK
+        string code
+        string description
+        string finding_id FK
+        string governance_review_id FK
+        string owner_id FK
+        string reviewer_id FK
+        string priority
+        string status
+        date due_date
+        date completion_date
+        string review_status
+    }
+
+    EVIDENCE {
+        string evidence_id PK
+        string action_id FK
+        string file_name
+        string file_path
+        string file_type
+        int file_size
+        string uploaded_by_id FK
+        string review_status
+        string reviewer_id FK
+        string comments
+        datetime uploaded_at
+    }

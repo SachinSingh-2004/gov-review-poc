@@ -23,6 +23,7 @@ import { ActionItem, Finding, User } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
+import { EvidenceUploader } from '../components/EvidenceUploader';
 import { useAuth } from '../context/AuthContext';
 
 export const ActionCentre: React.FC = () => {
@@ -238,6 +239,9 @@ export const ActionCentre: React.FC = () => {
                   />
                 </Grid>
               </Grid>
+
+              {/* Phase 2B: Evidence & Verification File Uploads */}
+              <EvidenceUploader entityType="ACTION" entityId={selectedAction.id} />
             </DialogContent>
             <DialogActions sx={{ px: 3, py: 2 }}>
               <Button onClick={() => setOpenUpdateModal(false)}>Cancel</Button>

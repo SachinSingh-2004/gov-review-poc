@@ -1,0 +1,250 @@
+erDiagram
+    %% Master ERD v2 - R&D Governance Portal
+    USER ||--o{ USER_ROLE : "has"
+    ROLE ||--o{ USER_ROLE : "assigned to"
+    ROLE ||--o{ ROLE_PERMISSION : "has"
+    PERMISSION ||--o{ ROLE_PERMISSION : "granted to"
+
+    PORTFOLIO ||--o{ PROJECT : "contains"
+    TECHNOLOGY_CENTER ||--o{ PROJECT : "oversees"
+    PROJECT_PHASE ||--o{ PROJECT : "defines phase"
+
+    USER ||--o{ PROJECT : "manages as PM"
+    USER ||--o{ PROJECT : "leads as Tech Lead"
+
+    PROJECT ||--o{ AUDIT : "audited by"
+    USER ||--o{ AUDIT : "leads as Lead Auditor"
+    AUDIT ||--o{ AUDIT_PARTICIPANT : "includes"
+    USER ||--o{ AUDIT_PARTICIPANT : "participates in"
+
+    AUDIT ||--o{ FINDING : "produces"
+    USER ||--o{ FINDING : "owns"
+
+    FINDING ||--o{ ACTION : "requires corrective"
+    GOVERNANCE_REVIEW ||--o{ ACTION : "generates governance"
+    USER ||--o{ ACTION : "assigned as owner"
+    USER ||--o{ ACTION : "reviews"
+
+    ACTION ||--o{ EVIDENCE : "supported by"
+    USER ||--o{ EVIDENCE : "uploaded by"
+    USER ||--o{ EVIDENCE : "reviewed by"
+
+    PROJECT ||--o{ RISK : "identifies"
+    PROJECT ||--o{ ISSUE : "encounters"
+    PROJECT ||--o{ MILESTONE : "tracks"
+    PROJECT ||--o{ DEPENDENCY : "source project"
+    PROJECT ||--o{ DEPENDENCY : "target project"
+
+    PROJECT ||--o{ GOVERNANCE_REVIEW : "undergoes"
+    USER ||--o{ GOVERNANCE_REVIEW : "conducts as Tech Center Manager"
+    GOVERNANCE_REVIEW ||--o| PM_UPDATE : "includes"
+    USER ||--o{ PM_UPDATE : "submitted by PM"
+    GOVERNANCE_REVIEW ||--o| GOVERNANCE_ASSESSMENT : "assessed by"
+    USER ||--o{ GOVERNANCE_ASSESSMENT : "assessed by Tech Center Manager"
+    GOVERNANCE_REVIEW ||--o{ GOVERNANCE_DECISION : "results in"
+    USER ||--o{ GOVERNANCE_DECISION : "decided by Leader"
+
+    GOVERNANCE_REVIEW ||--o| GOVERNANCE_REVIEW : "previous_review"
+
+    USER ||--o{ AUDIT_LOG : "triggers"
+
+    USER {
+        string user_id PK
+        string username
+        string email
+        string full_name
+        string department
+        boolean is_active
+    }
+
+    ROLE {
+        string role_id PK
+        string name
+        string description
+    }
+
+    PERMISSION {
+        string permission_id PK
+        string code
+        string description
+    }
+
+    PORTFOLIO {
+        string portfolio_id PK
+        string name
+        string code
+        string description
+    }
+
+    TECHNOLOGY_CENTER {
+        string technology_center_id PK
+        string name
+        string code
+        string lead_user_id FK
+    }
+
+    PROJECT_PHASE {
+        string phase_id PK
+        string name
+        string code
+        int sequence
+    }
+
+    PROJECT {
+        string project_id PK
+        string code
+        string name
+        string description
+        string portfolio_id FK
+        string technology_center_id FK
+        string current_phase_id FK
+        string project_manager_id FK
+        string technical_lead_id FK
+        string overall_health_status
+    }
+
+    AUDIT {
+        string audit_id PK
+        string code
+        string title
+        string project_id FK
+        string lead_auditor_id FK
+        date start_date
+        date end_date
+        string status
+        string audit_type
+        string scope_description
+    }
+
+    FINDING {
+        string finding_id PK
+        string code
+        string audit_id FK
+        string title
+        string description
+        string severity
+        string status
+        string owner_id FK
+        date due_date
+    }
+
+    ACTION {
+        string action_id PK
+        string code
+        string description
+        string finding_id FK
+        string governance_review_id FK
+        string owner_id FK
+        string reviewer_id FK
+        string priority
+        string status
+        date due_date
+        date completion_date
+        string review_status
+    }
+
+    EVIDENCE {
+        string evidence_id PK
+        string action_id FK
+        string file_name
+        string file_path
+        string file_type
+        int file_size
+        string uploaded_by_id FK
+        string review_status
+        string reviewer_id FK
+        string comments
+        datetime uploaded_at
+    }
+
+    RISK {
+        string risk_id PK
+        string project_id FK
+        string title
+        string risk_level
+        string mitigation_plan
+        string status
+    }
+
+    ISSUE {
+        string issue_id PK
+        string project_id FK
+        string title
+        string severity
+        string resolution_plan
+        string status
+    }
+
+    DEPENDENCY {
+        string dependency_id PK
+        string source_project_id FK
+        string target_project_id FK
+        string description
+        string dependency_type
+        string status
+    }
+
+    MILESTONE {
+        string milestone_id PK
+        string project_id FK
+        string title
+        date target_date
+        string status
+    }
+
+    GOVERNANCE_REVIEW {
+        string review_id PK
+        string project_id FK
+        string review_number
+        date review_date
+        string review_status
+        string overall_health_status
+        string previous_review_id FK
+        string technology_center_manager_id FK
+    }
+
+    PM_UPDATE {
+        string update_id PK
+        string review_id FK
+        string submitted_by_id FK
+        string what_changed
+        string support_required
+        string pending_decisions
+        string executive_actions
+        datetime submitted_at
+    }
+
+    GOVERNANCE_ASSESSMENT {
+        string assessment_id PK
+        string review_id FK
+        string assessed_by_id FK
+        string delivery_health
+        string engineering_health
+        int delivery_score
+        int engineering_score
+        int overall_score
+        string comments
+        datetime assessed_at
+    }
+
+    GOVERNANCE_DECISION {
+        string decision_id PK
+        string review_id FK
+        string title
+        string description
+        string owner_id FK
+        string status
+        date due_date
+        date decision_date
+        string final_decision
+    }
+
+    AUDIT_LOG {
+        string log_id PK
+        string user_id FK
+        string action_type
+        string entity_type
+        string entity_id
+        string details_json
+        datetime timestamp
+    }

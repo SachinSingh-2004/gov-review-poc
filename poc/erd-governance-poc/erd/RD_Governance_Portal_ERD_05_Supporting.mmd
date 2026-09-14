@@ -1,0 +1,42 @@
+erDiagram
+    %% Module 05: Supporting Entities (Risk, Issue, Dependency, Milestone)
+    PROJECT ||--o{ RISK : "identifies"
+    PROJECT ||--o{ ISSUE : "encounters"
+    PROJECT ||--o{ DEPENDENCY : "source project"
+    PROJECT ||--o{ DEPENDENCY : "target project"
+    PROJECT ||--o{ MILESTONE : "tracks"
+
+    RISK {
+        string risk_id PK
+        string project_id FK
+        string title
+        string risk_level
+        string mitigation_plan
+        string status
+    }
+
+    ISSUE {
+        string issue_id PK
+        string project_id FK
+        string title
+        string severity
+        string resolution_plan
+        string status
+    }
+
+    DEPENDENCY {
+        string dependency_id PK
+        string source_project_id FK
+        string target_project_id FK
+        string description
+        string dependency_type
+        string status
+    }
+
+    MILESTONE {
+        string milestone_id PK
+        string project_id FK
+        string title
+        date target_date
+        string status
+    }

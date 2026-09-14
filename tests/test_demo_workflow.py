@@ -23,8 +23,11 @@ def main():
     project_id = projects[0]["id"]
     admin_user_id = projects[0]["owner_id"]
 
+    import uuid
+    test_run_id = uuid.uuid4().hex[:6].upper()
+
     campaign_payload = {
-        "code": "CMP-2026-Q4-TEST",
+        "code": f"CMP-Q4-{test_run_id}",
         "name": "Q4 Quality Governance Campaign",
         "project_id": project_id,
         "description": "Enterprise wide Q4 governance audit campaign",
@@ -60,7 +63,7 @@ def main():
     auditor_id = res.json()["id"]
 
     audit_payload = {
-        "code": "AUD-Q4-001",
+        "code": f"AUD-Q4-{test_run_id}",
         "title": "Q4 Enterprise Quality Systems Audit",
         "campaign_id": campaign_id,
         "lead_auditor_id": auditor_id,
@@ -72,7 +75,20 @@ def main():
     assert res.status_code == 200, f"Step 4 Failed: {res.text}"
     audit = res.json()
     audit_id = audit["id"]
-    print(f"[SUCCESS] Created Audit ID: {audit_id} (Title: {audit['title']})")
+    print(f"[SUCCESS] Created Audit ID: {audit_id} (Title: {audit['title']}, Type: {audit['audit_type']})")
+
+    # STEP 4B: Test Lead Auditor Schedule Conflict Engine
+    log_step("4B", "Auditor checks schedule conflict engine for overlapping dates")
+    conflict_payload = {
+        "lead_auditor_id": auditor_id,
+        "start_date": "2026-10-10",
+        "end_date": "2026-10-20"
+    }
+    res = requests.post(f"{BASE_URL}/audits/schedule/check-conflicts", json=conflict_payload, headers=headers_auditor)
+    assert res.status_code == 200, f"Step 4B Failed: {res.text}"
+    conflict_res = res.json()
+    assert conflict_res["has_conflict"] is True, "Expected conflict for overlapping audit dates"
+    print(f"[SUCCESS] Schedule Conflict Engine correctly detected {conflict_res['conflict_count']} overlapping audit assignment(s).")
 
     # STEP 5: Auditor creates a Finding (Severity = Critical)
     log_step(5, "Auditor creates a Critical Finding associated with the Audit")
@@ -82,7 +98,7 @@ def main():
     action_owner_id = res.json()["id"]
 
     finding_payload = {
-        "code": "FND-CRIT-999",
+        "code": f"FND-CRIT-{test_run_id}",
         "audit_id": audit_id,
         "title": "Critical software compliance gap in validation protocol",
         "description": "Validation test coverage does not satisfy safety requirements.",
@@ -100,7 +116,7 @@ def main():
     # STEP 6: Auditor creates Action for Finding
     log_step(6, "Auditor creates Action for Finding assigned to Action Owner")
     action_payload = {
-        "code": "ACT-CRIT-999",
+        "code": f"ACT-CRIT-{test_run_id}",
         "finding_id": finding_id,
         "description": "Complete corrective documentation review and rerun validation protocol",
         "owner_id": action_owner_id,
@@ -128,6 +144,28 @@ def main():
     res = requests.put(f"{BASE_URL}/actions/{action_id}", json=update_payload, headers=headers_action_owner)
     assert res.status_code == 200, f"Step 8 Failed: {res.text}"
     print(f"[SUCCESS] Action status updated to: {res.json()['status']} | Evidence: {res.json()['evidence_summary']}")
+
+    # STEP 8B: Action Owner Uploads Physical Evidence Attachment
+    log_step("8B", "Action Owner uploads physical evidence attachment file (PDF)")
+    headers_upload = {"X-Persona-Role": "ACTION_OWNER"}
+    mock_file_content = b"%PDF-1.4 Mock Validation Report VP-2026-V2 Evidence Content 100% Passed"
+    files = {"file": ("VP-2026-V2-Validation-Report.pdf", mock_file_content, "application/pdf")}
+    data = {"entity_type": "ACTION", "entity_id": action_id}
+
+    res = requests.post(f"{BASE_URL}/attachments/upload", data=data, files=files, headers=headers_upload)
+    assert res.status_code == 200, f"Step 8B Upload Failed: {res.text}"
+    attachment = res.json()["attachment"]
+    attachment_id = attachment["id"]
+    print(f"[SUCCESS] Uploaded Evidence Attachment ID: {attachment_id} (File: {attachment['file_name']}, Size: {attachment['file_size']} bytes)")
+
+    # Verify attachment list
+    res = requests.get(f"{BASE_URL}/attachments/entity/ACTION/{action_id}", headers=headers_upload)
+    assert res.status_code == 200 and len(res.json()) >= 1, "Failed to retrieve uploaded evidence attachment"
+
+    # Verify file download
+    res = requests.get(f"{BASE_URL}/attachments/{attachment_id}/download", headers=headers_upload)
+    assert res.status_code == 200 and b"Validation Report" in res.content, "Failed to download uploaded evidence file"
+    print(f"[SUCCESS] Verified Evidence File Download via API endpoint.")
 
     # STEP 9: Database updates verified
     log_step(9, "Verify central database updated state")

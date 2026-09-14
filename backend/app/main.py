@@ -10,6 +10,7 @@ from app.routers import (
     audits,
     findings,
     actions,
+    attachments,
     dashboards,
     reports,
     admin,
@@ -40,6 +41,7 @@ app.include_router(campaigns.router, prefix=settings.API_V1_STR)
 app.include_router(audits.router, prefix=settings.API_V1_STR)
 app.include_router(findings.router, prefix=settings.API_V1_STR)
 app.include_router(actions.router, prefix=settings.API_V1_STR)
+app.include_router(attachments.router, prefix=settings.API_V1_STR)
 app.include_router(dashboards.router, prefix=settings.API_V1_STR)
 app.include_router(reports.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)

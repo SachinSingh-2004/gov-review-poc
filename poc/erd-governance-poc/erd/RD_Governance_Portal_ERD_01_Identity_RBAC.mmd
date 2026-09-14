@@ -1,0 +1,48 @@
+erDiagram
+    %% Module 01: Identity & RBAC
+    USER ||--o{ USER_ROLE : "has"
+    ROLE ||--o{ USER_ROLE : "assigned to"
+    ROLE ||--o{ ROLE_PERMISSION : "has"
+    PERMISSION ||--o{ ROLE_PERMISSION : "granted to"
+    USER ||--o{ AUDIT_LOG : "performs action"
+
+    USER {
+        string user_id PK
+        string username
+        string email
+        string full_name
+        string department
+        boolean is_active
+    }
+
+    ROLE {
+        string role_id PK
+        string name
+        string description
+    }
+
+    PERMISSION {
+        string permission_id PK
+        string code
+        string description
+    }
+
+    USER_ROLE {
+        string user_id PK, FK
+        string role_id PK, FK
+    }
+
+    ROLE_PERMISSION {
+        string role_id PK, FK
+        string permission_id PK, FK
+    }
+
+    AUDIT_LOG {
+        string log_id PK
+        string user_id FK
+        string action_type
+        string entity_type
+        string entity_id
+        string details_json
+        datetime timestamp
+    }

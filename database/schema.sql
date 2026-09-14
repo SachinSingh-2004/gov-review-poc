@@ -94,11 +94,17 @@ CREATE TABLE IF NOT EXISTS audits (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     status VARCHAR(20) DEFAULT 'PLANNED', -- PLANNED, IN_PROGRESS, FIELDWORK, ATTENTION, CLOSED
+    audit_type VARCHAR(50) DEFAULT 'PROCESS', -- PROCESS, DESIGN_CONTROL, SOFTWARE_SAFETY, CYBERSECURITY, VENDOR
+    recurrence_pattern VARCHAR(50) DEFAULT 'NONE', -- NONE, QUARTERLY, SEMI_ANNUAL, ANNUAL
+    scope_description TEXT,
+    estimated_hours DECIMAL(6,2) DEFAULT 40.00,
+    milestone_id VARCHAR(36),
     closure_percentage DECIMAL(5,2) DEFAULT 0.00,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (campaign_id) REFERENCES campaigns(id),
-    FOREIGN KEY (lead_auditor_id) REFERENCES users(id)
+    FOREIGN KEY (lead_auditor_id) REFERENCES users(id),
+    FOREIGN KEY (milestone_id) REFERENCES milestones(id)
 );
 
 -- --------------------------------------------------------
@@ -190,9 +196,25 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS attachments (
+    id VARCHAR(36) PRIMARY KEY,
+    entity_type VARCHAR(20) NOT NULL, -- ACTION, FINDING
+    entity_id VARCHAR(36) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    stored_file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size INT NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    uploaded_by_id VARCHAR(36) NOT NULL,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uploaded_by_id) REFERENCES users(id)
+);
+
 -- Indexing for performance
 CREATE INDEX idx_findings_severity ON findings(severity);
 CREATE INDEX idx_findings_status ON findings(status);
 CREATE INDEX idx_actions_status ON actions(status);
 CREATE INDEX idx_actions_owner ON actions(owner_id);
 CREATE INDEX idx_audits_status ON audits(status);
+CREATE INDEX idx_attachments_entity ON attachments(entity_id);
+

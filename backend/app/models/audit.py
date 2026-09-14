@@ -15,6 +15,11 @@ class Audit(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     status = Column(String(20), default='PLANNED') # PLANNED, IN_PROGRESS, FIELDWORK, ATTENTION, CLOSED
+    audit_type = Column(String(50), default='PROCESS') # PROCESS, DESIGN_CONTROL, SOFTWARE_SAFETY, CYBERSECURITY, VENDOR
+    recurrence_pattern = Column(String(50), default='NONE') # NONE, QUARTERLY, SEMI_ANNUAL, ANNUAL
+    scope_description = Column(Text, nullable=True)
+    estimated_hours = Column(Numeric(6, 2), default=40.00)
+    milestone_id = Column(String(36), ForeignKey('milestones.id'), nullable=True)
     closure_percentage = Column(Numeric(5, 2), default=0.00)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -22,4 +27,5 @@ class Audit(Base):
     # Relationships
     campaign = relationship('Campaign', back_populates='audits')
     lead_auditor = relationship('User', foreign_keys=[lead_auditor_id])
+    milestone = relationship('Milestone', foreign_keys=[milestone_id])
     findings = relationship('Finding', back_populates='audit', cascade='all, delete-orphan')

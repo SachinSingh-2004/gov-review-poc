@@ -1,0 +1,42 @@
+erDiagram
+    %% Module 02: Project & Portfolio Structure
+    PORTFOLIO ||--o{ PROJECT : "contains"
+    TECHNOLOGY_CENTER ||--o{ PROJECT : "oversees"
+    PROJECT_PHASE ||--o{ PROJECT : "defines phase"
+    USER ||--o{ PROJECT : "manages as PM"
+    USER ||--o{ PROJECT : "leads as Tech Lead"
+    USER ||--o{ TECHNOLOGY_CENTER : "leads TC"
+
+    PORTFOLIO {
+        string portfolio_id PK
+        string name
+        string code
+        string description
+    }
+
+    TECHNOLOGY_CENTER {
+        string technology_center_id PK
+        string name
+        string code
+        string lead_user_id FK
+    }
+
+    PROJECT_PHASE {
+        string phase_id PK
+        string name
+        string code
+        int sequence
+    }
+
+    PROJECT {
+        string project_id PK
+        string code
+        string name
+        string description
+        string portfolio_id FK
+        string technology_center_id FK
+        string current_phase_id FK
+        string project_manager_id FK
+        string technical_lead_id FK
+        string overall_health_status
+    }

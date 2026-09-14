@@ -1,0 +1,70 @@
+erDiagram
+    %% Module 04: Governance Review Lifecycle
+    PROJECT ||--o{ GOVERNANCE_REVIEW : "undergoes"
+    GOVERNANCE_REVIEW ||--o| PM_UPDATE : "includes"
+    GOVERNANCE_REVIEW ||--o| GOVERNANCE_ASSESSMENT : "assessed by"
+    GOVERNANCE_REVIEW ||--o{ GOVERNANCE_DECISION : "results in"
+    GOVERNANCE_REVIEW ||--o{ ACTION : "generates governance action"
+    GOVERNANCE_REVIEW ||--o| GOVERNANCE_REVIEW : "previous_review"
+
+    USER ||--o{ GOVERNANCE_REVIEW : "conducted by TC Manager"
+    USER ||--o{ PM_UPDATE : "submitted by PM"
+    USER ||--o{ GOVERNANCE_ASSESSMENT : "assessed by TC Manager"
+    USER ||--o{ GOVERNANCE_DECISION : "decided by Leader"
+
+    GOVERNANCE_REVIEW {
+        string review_id PK
+        string project_id FK
+        string review_number
+        date review_date
+        string review_status
+        string overall_health_status
+        string previous_review_id FK
+        string technology_center_manager_id FK
+    }
+
+    PM_UPDATE {
+        string update_id PK
+        string review_id FK
+        string submitted_by_id FK
+        string what_changed
+        string support_required
+        string pending_decisions
+        string executive_actions
+        datetime submitted_at
+    }
+
+    GOVERNANCE_ASSESSMENT {
+        string assessment_id PK
+        string review_id FK
+        string assessed_by_id FK
+        string delivery_health
+        string engineering_health
+        int delivery_score
+        int engineering_score
+        int overall_score
+        string comments
+        datetime assessed_at
+    }
+
+    GOVERNANCE_DECISION {
+        string decision_id PK
+        string review_id FK
+        string title
+        string description
+        string owner_id FK
+        string status
+        date due_date
+        date decision_date
+        string final_decision
+    }
+
+    ACTION {
+        string action_id PK
+        string code
+        string description
+        string governance_review_id FK
+        string owner_id FK
+        string status
+        date due_date
+    }

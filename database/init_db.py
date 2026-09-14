@@ -12,6 +12,7 @@ from app.models.campaign import Campaign
 from app.models.audit import Audit
 from app.models.finding import Finding
 from app.models.action import Action
+from app.models.attachment import Attachment
 from app.models.governance import AuditLog, Notification
 
 def init_db():
@@ -144,15 +145,28 @@ def init_db():
 
         # 6. Audits
         audits_data = [
-            ("AUD-001", "QMS Process Audit - Diagnostics", campaign_dict["CMP-2026-Q1"].id, user_dict["auditor_jane"].id, date.today() - timedelta(days=45), date.today() - timedelta(days=10), "FIELDWORK", 65.00),
-            ("AUD-002", "Design Control Compliance Review", campaign_dict["CMP-2026-Q1"].id, user_dict["auditor_jane"].id, date.today() - timedelta(days=20), date.today() + timedelta(days=10), "IN_PROGRESS", 40.00),
-            ("AUD-003", "Software Quality Audit - Autonomous", campaign_dict["CMP-2026-Q2"].id, user_dict["auditor_jane"].id, date.today() - timedelta(days=15), date.today() + timedelta(days=25), "ATTENTION", 25.00),
-            ("AUD-004", "Robotic Firmware Safety Audit", campaign_dict["CMP-2026-Q2"].id, user_dict["auditor_jane"].id, date.today() + timedelta(days=10), date.today() + timedelta(days=40), "PLANNED", 0.00),
+            ("AUD-001", "QMS Process Audit - Diagnostics", campaign_dict["CMP-2026-Q1"].id, user_dict["auditor_jane"].id, date.today() - timedelta(days=45), date.today() - timedelta(days=10), "FIELDWORK", 65.00, "PROCESS", "QUARTERLY", "Complete QMS software design control audit", 48.0),
+            ("AUD-002", "Design Control Compliance Review", campaign_dict["CMP-2026-Q1"].id, user_dict["auditor_jane"].id, date.today() - timedelta(days=20), date.today() + timedelta(days=10), "IN_PROGRESS", 40.00, "DESIGN_CONTROL", "SEMI_ANNUAL", "Design history file and risk traceability verification", 36.0),
+            ("AUD-003", "Software Quality Audit - Autonomous", campaign_dict["CMP-2026-Q2"].id, user_dict["auditor_jane"].id, date.today() - timedelta(days=15), date.today() + timedelta(days=25), "ATTENTION", 25.00, "SOFTWARE_SAFETY", "ANNUAL", "Autonomous vehicle firmware safety boundary analysis", 60.0),
+            ("AUD-004", "Robotic Firmware Safety Audit", campaign_dict["CMP-2026-Q2"].id, user_dict["auditor_jane"].id, date.today() + timedelta(days=10), date.today() + timedelta(days=40), "PLANNED", 0.00, "CYBERSECURITY", "NONE", "IEC 62443 cyber safety protocol check", 30.0),
         ]
 
         audit_dict = {}
-        for code, title, cmp_id, auditor_id, sdate, edate, status, pct in audits_data:
-            aud = Audit(code=code, title=title, campaign_id=cmp_id, lead_auditor_id=auditor_id, start_date=sdate, end_date=edate, status=status, closure_percentage=pct)
+        for code, title, cmp_id, auditor_id, sdate, edate, status, pct, atype, rec, scope, hrs in audits_data:
+            aud = Audit(
+                code=code,
+                title=title,
+                campaign_id=cmp_id,
+                lead_auditor_id=auditor_id,
+                start_date=sdate,
+                end_date=edate,
+                status=status,
+                closure_percentage=pct,
+                audit_type=atype,
+                recurrence_pattern=rec,
+                scope_description=scope,
+                estimated_hours=hrs
+            )
             db.add(aud)
             audit_dict[code] = aud
         db.commit()

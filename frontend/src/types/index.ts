@@ -94,6 +94,9 @@ export interface Campaign {
   audit_count?: number;
 }
 
+export type AuditType = 'PROCESS' | 'DESIGN_CONTROL' | 'SOFTWARE_SAFETY' | 'CYBERSECURITY' | 'VENDOR';
+export type RecurrencePattern = 'NONE' | 'QUARTERLY' | 'SEMI_ANNUAL' | 'ANNUAL';
+
 export interface Audit {
   id: string;
   code: string;
@@ -104,13 +107,46 @@ export interface Audit {
   project_name?: string;
   lead_auditor_id: string;
   lead_auditor_name?: string;
+  lead_auditor_email?: string;
   start_date: string;
   end_date: string;
   status: 'PLANNED' | 'IN_PROGRESS' | 'FIELDWORK' | 'ATTENTION' | 'CLOSED';
+  audit_type?: AuditType;
+  recurrence_pattern?: RecurrencePattern;
+  scope_description?: string;
+  estimated_hours?: number;
+  milestone_id?: string;
+  milestone_title?: string;
   closure_percentage: number;
   created_at: string;
   updated_at: string;
   finding_count?: number;
+}
+
+export interface AuditConflictCheckResponse {
+  has_conflict: boolean;
+  conflict_count: number;
+  overlapping_audits: Array<{
+    id: string;
+    code: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+  }>;
+  message: string;
+}
+
+export interface Attachment {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_by_id: string;
+  uploaded_by_name?: string;
+  uploaded_at: string;
 }
 
 export interface Finding {
@@ -133,6 +169,8 @@ export interface Finding {
   created_at: string;
   updated_at: string;
   action_count?: number;
+  attachments?: Attachment[];
+  attachment_count?: number;
 }
 
 export interface ActionItem {
@@ -154,6 +192,8 @@ export interface ActionItem {
   reviewer_name?: string;
   created_at: string;
   updated_at: string;
+  attachments?: Attachment[];
+  attachment_count?: number;
 }
 
 export interface AuditLog {
