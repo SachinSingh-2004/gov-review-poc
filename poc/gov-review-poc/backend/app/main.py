@@ -7,22 +7,14 @@ from app.routers import auth_router, project_router, review_router, context_rout
 # Initialize tables
 Base.metadata.create_all(bind=engine)
 
+from app.seed import seed
+
 # Auto seed data if fresh database
 def auto_seed():
-    db = SessionLocal()
     try:
-        if db.query(User).count() == 0:
-            import sys, os
-            sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'seed')))
-            try:
-                import seed_demo_data
-                seed_demo_data.seed()
-            except Exception as e:
-                print("Auto seed error:", e)
+        seed()
     except Exception as e:
-        print("Database check error:", e)
-    finally:
-        db.close()
+        print("Auto seed error:", e)
 
 auto_seed()
 
