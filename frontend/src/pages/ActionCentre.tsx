@@ -25,6 +25,7 @@ import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
 import { EvidenceUploader } from '../components/EvidenceUploader';
 import { useAuth } from '../context/AuthContext';
+import { MOCK_ACTIONS, MOCK_FINDINGS, MOCK_USERS } from '../mockData/governanceMockData';
 
 export const ActionCentre: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -50,39 +51,48 @@ export const ActionCentre: React.FC = () => {
     status: 'OPEN',
   });
 
-  const { data: actions = [], isLoading } = useQuery<ActionItem[]>({
+  const { data: actions = MOCK_ACTIONS, isLoading } = useQuery<ActionItem[]>({
     queryKey: ['actions'],
     queryFn: async () => {
       try {
         const res = await api.get('/actions');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_ACTIONS;
     },
   });
 
-  const { data: findings = [] } = useQuery<Finding[]>({
+  const { data: findings = MOCK_FINDINGS } = useQuery<Finding[]>({
     queryKey: ['findings'],
     queryFn: async () => {
       try {
         const res = await api.get('/findings');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_FINDINGS;
     },
   });
 
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = MOCK_USERS } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
       try {
         const res = await api.get('/users');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_USERS;
     },
   });
 

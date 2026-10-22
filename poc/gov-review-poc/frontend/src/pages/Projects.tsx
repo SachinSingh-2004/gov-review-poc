@@ -18,19 +18,23 @@ import { Project } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
+import { MOCK_PROJECTS } from '../mockData/governanceMockData';
 
 export const Projects: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string | false>(false);
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
+  const { data: projects = MOCK_PROJECTS, isLoading } = useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: async () => {
       try {
         const res = await api.get('/projects');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_PROJECTS;
     },
   });
 

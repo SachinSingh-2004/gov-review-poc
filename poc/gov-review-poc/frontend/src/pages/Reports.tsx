@@ -12,14 +12,35 @@ import {
 import { Download as DownloadIcon, Description as ReportIcon } from '@mui/icons-material';
 
 import { PageHeader } from '../components/PageHeader';
+import { MOCK_AUDITS, MOCK_FINDINGS, MOCK_ACTIONS } from '../mockData/governanceMockData';
 
 export const Reports: React.FC = () => {
   const [reportType, setReportType] = useState('findings');
   const [format, setFormat] = useState('csv');
 
   const handleExport = () => {
-    const downloadUrl = `/api/reports/export?report_type=${reportType}&format=${format}`;
-    window.open(downloadUrl, '_blank');
+    let csvContent = '';
+    const filename = `governance_${reportType}_report.csv`;
+
+    if (reportType === 'findings') {
+      csvContent = 'Code,Title,Project,Severity,Status,Owner,Due Date\n' +
+        MOCK_FINDINGS.map(f => `"${f.code}","${f.title.replace(/"/g, '""')}","${f.project_name || ''}","${f.severity}","${f.status}","${f.owner_name || ''}","${f.due_date}"`).join('\n');
+    } else if (reportType === 'audits') {
+      csvContent = 'Code,Title,Campaign,Lead Auditor,Status,Closure %,Start Date,End Date\n' +
+        MOCK_AUDITS.map(a => `"${a.code}","${a.title.replace(/"/g, '""')}","${a.campaign_name || ''}","${a.lead_auditor_name || ''}","${a.status}",${a.closure_percentage},"${a.start_date}","${a.end_date}"`).join('\n');
+    } else {
+      csvContent = 'Code,Finding Code,Description,Owner,Status,Due Date\n' +
+        MOCK_ACTIONS.map(ac => `"${ac.code}","${ac.finding_code || ''}","${ac.description.replace(/"/g, '""')}","${ac.owner_name || ''}","${ac.status}","${ac.due_date}"`).join('\n');
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (

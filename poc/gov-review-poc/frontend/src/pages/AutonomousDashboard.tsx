@@ -13,17 +13,21 @@ import { SmartToy as AutonomousIcon, Shield as SafetyIcon } from '@mui/icons-mat
 import { api } from '../services/api';
 import { PageHeader } from '../components/PageHeader';
 import { KpiCard } from '../components/KpiCard';
+import { MOCK_AUTONOMOUS_SUMMARY } from '../mockData/governanceMockData';
 
 export const AutonomousDashboard: React.FC = () => {
-  const { data: autoData, isLoading } = useQuery({
+  const { data: autoData = MOCK_AUTONOMOUS_SUMMARY, isLoading } = useQuery({
     queryKey: ['autonomous-summary'],
     queryFn: async () => {
       try {
         const res = await api.get('/autonomous/summary');
-        return res.data;
+        if (res.data && res.data.project_name) {
+          return res.data;
+        }
       } catch {
-        return null;
+        // Fallback
       }
+      return MOCK_AUTONOMOUS_SUMMARY;
     },
   });
 

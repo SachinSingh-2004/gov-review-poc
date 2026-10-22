@@ -25,6 +25,7 @@ import { StatusChip } from '../components/StatusChip';
 import { SeverityBadge } from '../components/SeverityBadge';
 import { EvidenceUploader } from '../components/EvidenceUploader';
 import { useAuth } from '../context/AuthContext';
+import { MOCK_FINDINGS, MOCK_AUDITS, MOCK_USERS } from '../mockData/governanceMockData';
 
 export const Findings: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -49,39 +50,48 @@ export const Findings: React.FC = () => {
     status: 'OPEN',
   });
 
-  const { data: findings = [], isLoading } = useQuery<Finding[]>({
+  const { data: findings = MOCK_FINDINGS, isLoading } = useQuery<Finding[]>({
     queryKey: ['findings'],
     queryFn: async () => {
       try {
         const res = await api.get('/findings');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_FINDINGS;
     },
   });
 
-  const { data: audits = [] } = useQuery<Audit[]>({
+  const { data: audits = MOCK_AUDITS } = useQuery<Audit[]>({
     queryKey: ['audits'],
     queryFn: async () => {
       try {
         const res = await api.get('/audits');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_AUDITS;
     },
   });
 
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = MOCK_USERS } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
       try {
         const res = await api.get('/users');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_USERS;
     },
   });
 

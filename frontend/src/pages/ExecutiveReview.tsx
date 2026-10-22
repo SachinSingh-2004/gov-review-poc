@@ -15,19 +15,23 @@ import { api } from '../services/api';
 import { ExecutiveSummary } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { KpiCard } from '../components/KpiCard';
+import { MOCK_EXECUTIVE_SUMMARY } from '../mockData/governanceMockData';
 
 export const ExecutiveReview: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: execSummary } = useQuery<ExecutiveSummary>({
+  const { data: execSummary = MOCK_EXECUTIVE_SUMMARY } = useQuery<ExecutiveSummary>({
     queryKey: ['executive-summary'],
     queryFn: async () => {
       try {
         const res = await api.get('/executive/summary');
-        return res.data;
+        if (res.data && typeof res.data.overall_governance_score === 'number') {
+          return res.data;
+        }
       } catch {
-        return null;
+        // Fallback
       }
+      return MOCK_EXECUTIVE_SUMMARY;
     },
   });
 

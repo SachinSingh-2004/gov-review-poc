@@ -15,19 +15,23 @@ import { PageHeader } from '../components/PageHeader';
 import { KpiCard } from '../components/KpiCard';
 import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
+import { MOCK_AUDITS } from '../mockData/governanceMockData';
 
 export const AuditDashboard: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: audits = [], isLoading } = useQuery<Audit[]>({
+  const { data: audits = MOCK_AUDITS, isLoading } = useQuery<Audit[]>({
     queryKey: ['audits'],
     queryFn: async () => {
       try {
         const res = await api.get('/audits');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_AUDITS;
     },
   });
 

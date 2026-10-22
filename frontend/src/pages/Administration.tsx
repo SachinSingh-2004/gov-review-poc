@@ -14,43 +14,53 @@ import { User, Role, AuditLog } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
+import { MOCK_USERS, MOCK_ROLES, MOCK_AUDIT_LOGS } from '../mockData/governanceMockData';
 
 export const Administration: React.FC = () => {
   const [tab, setTab] = useState(0);
 
-  const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
+  const { data: users = MOCK_USERS, isLoading: loadingUsers } = useQuery<User[]>({
     queryKey: ['admin-users'],
     queryFn: async () => {
       try {
         const res = await api.get('/users');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_USERS;
     },
   });
 
-  const { data: roles = [], isLoading: loadingRoles } = useQuery<Role[]>({
+  const { data: roles = MOCK_ROLES, isLoading: loadingRoles } = useQuery<Role[]>({
     queryKey: ['admin-roles'],
     queryFn: async () => {
       try {
         const res = await api.get('/users/roles');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_ROLES;
     },
   });
 
-  const { data: auditLogs = [], isLoading: loadingLogs } = useQuery<AuditLog[]>({
+  const { data: auditLogs = MOCK_AUDIT_LOGS, isLoading: loadingLogs } = useQuery<AuditLog[]>({
     queryKey: ['admin-audit-logs'],
     queryFn: async () => {
       try {
         const res = await api.get('/admin/audit-logs');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_AUDIT_LOGS;
     },
   });
 

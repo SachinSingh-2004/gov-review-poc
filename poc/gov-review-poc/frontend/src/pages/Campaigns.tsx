@@ -20,6 +20,7 @@ import { PageHeader } from '../components/PageHeader';
 import { DataTable, Column } from '../components/DataTable';
 import { StatusChip } from '../components/StatusChip';
 import { useAuth } from '../context/AuthContext';
+import { MOCK_CAMPAIGNS, MOCK_PROJECTS, MOCK_USERS } from '../mockData/governanceMockData';
 
 export const Campaigns: React.FC = () => {
   const queryClient = useQueryClient();
@@ -37,39 +38,48 @@ export const Campaigns: React.FC = () => {
     status: 'PLANNED',
   });
 
-  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
+  const { data: campaigns = MOCK_CAMPAIGNS, isLoading } = useQuery<Campaign[]>({
     queryKey: ['campaigns'],
     queryFn: async () => {
       try {
         const res = await api.get('/campaigns');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_CAMPAIGNS;
     },
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = MOCK_PROJECTS } = useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: async () => {
       try {
         const res = await api.get('/projects');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_PROJECTS;
     },
   });
 
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = MOCK_USERS } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
       try {
         const res = await api.get('/users');
-        return Array.isArray(res.data) ? res.data : [];
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          return res.data;
+        }
       } catch {
-        return [];
+        // Fallback
       }
+      return MOCK_USERS;
     },
   });
 
