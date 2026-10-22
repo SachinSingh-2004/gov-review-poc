@@ -17,7 +17,14 @@ import { KpiCard } from '../components/KpiCard';
 export const AutonomousDashboard: React.FC = () => {
   const { data: autoData, isLoading } = useQuery({
     queryKey: ['autonomous-summary'],
-    queryFn: async () => (await api.get('/autonomous/summary')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/autonomous/summary');
+        return res.data;
+      } catch {
+        return null;
+      }
+    },
   });
 
   return (

@@ -37,19 +37,40 @@ export const Campaigns: React.FC = () => {
     status: 'PLANNED',
   });
 
-  const { data: campaigns, isLoading } = useQuery<Campaign[]>({
+  const { data: campaigns = [], isLoading } = useQuery<Campaign[]>({
     queryKey: ['campaigns'],
-    queryFn: async () => (await api.get('/campaigns')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/campaigns');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: projects } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ['projects'],
-    queryFn: async () => (await api.get('/projects')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/projects');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: users } = useQuery<User[]>({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ['users'],
-    queryFn: async () => (await api.get('/users')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/users');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const createMutation = useMutation({

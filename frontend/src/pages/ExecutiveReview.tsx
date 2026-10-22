@@ -21,7 +21,14 @@ export const ExecutiveReview: React.FC = () => {
 
   const { data: execSummary } = useQuery<ExecutiveSummary>({
     queryKey: ['executive-summary'],
-    queryFn: async () => (await api.get('/executive/summary')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/executive/summary');
+        return res.data;
+      } catch {
+        return null;
+      }
+    },
   });
 
   return (

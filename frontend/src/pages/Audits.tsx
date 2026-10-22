@@ -172,7 +172,12 @@ export const Audits: React.FC = () => {
   ];
 
   // Group audits by Auditor for Workload Matrix
-  const auditorsList = users?.filter(u => u.roles.some(r => r.name === 'AUDITOR' || r.name === 'AUDIT_MANAGER' || r.name === 'ADMIN')) || [];
+  const auditorsList = (Array.isArray(users) ? users : []).filter(u =>
+    Array.isArray(u?.roles) && u.roles.some(r => {
+      const rName = r?.name || (r as any)?.role_code || '';
+      return rName === 'AUDITOR' || rName === 'AUDIT_MANAGER' || rName === 'ADMIN';
+    })
+  );
 
   return (
     <Box>

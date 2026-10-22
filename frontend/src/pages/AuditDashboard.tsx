@@ -19,18 +19,23 @@ import { StatusChip } from '../components/StatusChip';
 export const AuditDashboard: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: audits, isLoading } = useQuery<Audit[]>({
+  const { data: audits = [], isLoading } = useQuery<Audit[]>({
     queryKey: ['audits'],
     queryFn: async () => {
-      const res = await api.get('/audits');
-      return res.data;
+      try {
+        const res = await api.get('/audits');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
     },
   });
 
-  const totalAudits = audits ? audits.length : 0;
-  const inProgress = audits ? audits.filter((a) => a.status === 'IN_PROGRESS' || a.status === 'FIELDWORK').length : 0;
-  const attentionRequired = audits ? audits.filter((a) => a.status === 'ATTENTION').length : 0;
-  const closedAudits = audits ? audits.filter((a) => a.status === 'CLOSED').length : 0;
+  const auditList = Array.isArray(audits) ? audits : [];
+  const totalAudits = auditList.length;
+  const inProgress = auditList.filter((a) => a?.status === 'IN_PROGRESS' || a?.status === 'FIELDWORK').length;
+  const attentionRequired = auditList.filter((a) => a?.status === 'ATTENTION').length;
+  const closedAudits = auditList.filter((a) => a?.status === 'CLOSED').length;
 
   const columns: Column<Audit>[] = [
     { id: 'code', label: 'Audit Code', minWidth: 110 },

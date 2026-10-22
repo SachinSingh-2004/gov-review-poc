@@ -50,19 +50,40 @@ export const ActionCentre: React.FC = () => {
     status: 'OPEN',
   });
 
-  const { data: actions, isLoading } = useQuery<ActionItem[]>({
+  const { data: actions = [], isLoading } = useQuery<ActionItem[]>({
     queryKey: ['actions'],
-    queryFn: async () => (await api.get('/actions')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/actions');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: findings } = useQuery<Finding[]>({
+  const { data: findings = [] } = useQuery<Finding[]>({
     queryKey: ['findings'],
-    queryFn: async () => (await api.get('/findings')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/findings');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: users } = useQuery<User[]>({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ['users'],
-    queryFn: async () => (await api.get('/users')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/users');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const updateMutation = useMutation({
@@ -118,22 +139,22 @@ export const ActionCentre: React.FC = () => {
 
   // Tab filtering logic
   const getFilteredActions = () => {
-    const list = actions || [];
+    const list = Array.isArray(actions) ? actions : [];
     switch (activeTab) {
       case 1: // My Actions
-        return list.filter((a) => a.owner_id === user?.id || currentRole === 'ACTION_OWNER');
+        return list.filter((a) => a && (a.owner_id === user?.id || currentRole === 'ACTION_OWNER'));
       case 2: // Open Actions
-        return list.filter((a) => a.status === 'OPEN');
+        return list.filter((a) => a && a.status === 'OPEN');
       case 3: // In Progress
-        return list.filter((a) => a.status === 'IN_PROGRESS');
+        return list.filter((a) => a && a.status === 'IN_PROGRESS');
       case 4: // Overdue
-        return list.filter((a) => a.status === 'OVERDUE');
+        return list.filter((a) => a && a.status === 'OVERDUE');
       case 5: // Completed / Closed
-        return list.filter((a) => a.status === 'COMPLETED' || a.status === 'CLOSED');
+        return list.filter((a) => a && (a.status === 'COMPLETED' || a.status === 'CLOSED'));
       case 0:
       default:
-        if (initialStatus === 'OVERDUE') return list.filter((a) => a.status === 'OVERDUE');
-        return list;
+        if (initialStatus === 'OVERDUE') return list.filter((a) => a && a.status === 'OVERDUE');
+        return list.filter(Boolean);
     }
   };
 

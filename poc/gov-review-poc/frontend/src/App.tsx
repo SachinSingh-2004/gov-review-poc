@@ -6,6 +6,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { theme } from './theme/theme';
 import { AuthProvider } from './context/AuthContext';
 import { MainLayout } from './layouts/MainLayout';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { Home } from './pages/Home';
 import { AuditDashboard } from './pages/AuditDashboard';
@@ -25,7 +26,8 @@ import { LoginPage } from './pages/LoginPage';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
+      retry: false,
       staleTime: 5000,
     },
   },
@@ -33,37 +35,39 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Login and POC routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/poc" element={<GovernanceReviewHome />} />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Legacy POC routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/poc" element={<GovernanceReviewHome />} />
 
-              {/* Full Governance Portal (Default) */}
-              <Route path="/" element={<MainLayout />}>
-                <Route index element={<Home />} />
-                <Route path="audit-dashboard" element={<AuditDashboard />} />
-                <Route path="audits" element={<Audits />} />
-                <Route path="findings" element={<Findings />} />
-                <Route path="actions" element={<ActionCentre />} />
-                <Route path="projects" element={<Projects />} />
-                <Route path="campaigns" element={<Campaigns />} />
-                <Route path="portfolio" element={<PortfolioDashboard />} />
-                <Route path="autonomous" element={<AutonomousDashboard />} />
-                <Route path="executive" element={<ExecutiveReview />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="administration" element={<Administration />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+                {/* Full Governance Portal (Default) */}
+                <Route path="/" element={<MainLayout />}>
+                  <Route index element={<Home />} />
+                  <Route path="audit-dashboard" element={<AuditDashboard />} />
+                  <Route path="audits" element={<Audits />} />
+                  <Route path="findings" element={<Findings />} />
+                  <Route path="actions" element={<ActionCentre />} />
+                  <Route path="projects" element={<Projects />} />
+                  <Route path="campaigns" element={<Campaigns />} />
+                  <Route path="portfolio" element={<PortfolioDashboard />} />
+                  <Route path="autonomous" element={<AutonomousDashboard />} />
+                  <Route path="executive" element={<ExecutiveReview />} />
+                  <Route path="reports" element={<Reports />} />
+                  <Route path="administration" element={<Administration />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

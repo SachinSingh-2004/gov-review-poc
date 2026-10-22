@@ -93,6 +93,49 @@ const createFallbackUser = (role: UserRole): User => {
   };
 };
 
+const normalizeUser = (data: any, fallbackRole: UserRole): User => {
+  if (!data || typeof data !== 'object') {
+    return createFallbackUser(fallbackRole);
+  }
+  const p = DEFAULT_DEMO_PERSONAS.find((item) => item.role === fallbackRole) || DEFAULT_DEMO_PERSONAS[0];
+  const fullName = data.full_name || data.display_name || data.name || p.full_name;
+  const username = data.username || p.username;
+  const email = data.email || p.email;
+  const department = data.department || p.department;
+
+  let roles: any[] = [];
+  if (Array.isArray(data.roles) && data.roles.length > 0) {
+    roles = data.roles.map((r: any) => ({
+      id: String(r?.id || r?.role_id || '1'),
+      name: (r?.name || r?.role_code || fallbackRole) as UserRole,
+      description: r?.description || r?.role_name || p.description,
+      permissions: Array.isArray(r?.permissions)
+        ? r.permissions
+        : [{ id: 'p-all', code: 'ALL', description: 'All Permissions' }],
+    }));
+  } else {
+    roles = [
+      {
+        id: `role-${fallbackRole.toLowerCase()}`,
+        name: fallbackRole,
+        description: p.description,
+        permissions: [{ id: 'p-all', code: 'ALL', description: 'All Permissions' }],
+      },
+    ];
+  }
+
+  return {
+    id: String(data.id || data.user_id || `user-${fallbackRole.toLowerCase()}`),
+    username,
+    full_name: fullName,
+    email,
+    department,
+    is_active: data.is_active ?? true,
+    roles,
+    created_at: data.created_at || new Date().toISOString(),
+  };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentRole, setCurrentRole] = useState<UserRole>(
     (localStorage.getItem('persona_role') as UserRole) || 'ADMIN'
@@ -107,18 +150,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.data && Array.isArray(res.data) && res.data.length > 0) {
         setPersonas(res.data);
       }
-    } catch (err) {
-      console.warn('Backend unavailable, using default demo personas');
+    } catch {
+      // Keep default personas on network error
     }
   };
 
   const fetchCurrentUser = async () => {
     try {
       const res = await api.get('/auth/me');
-      if (res.data && res.data.username) {
-        setUser(res.data);
+      if (res.data) {
+        setUser(normalizeUser(res.data, currentRole));
+      } else {
+        setUser(createFallbackUser(currentRole));
       }
-    } catch (err) {
+    } catch {
       setUser(createFallbackUser(currentRole));
     }
   };
@@ -131,14 +176,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const switchPersona = (role: UserRole) => {
     localStorage.setItem('persona_role', role);
     setCurrentRole(role);
+    setUser(createFallbackUser(role));
   };
 
   const hasPermission = (permissionCode: string): boolean => {
     if (!user) return false;
     if (currentRole === 'ADMIN') return true;
+    if (!Array.isArray(user.roles)) return true;
 
     for (const role of user.roles) {
-      if (role.permissions.some((p) => p.code === permissionCode)) {
+      if (Array.isArray(role?.permissions) && role.permissions.some((p) => p && p.code === permissionCode)) {
         return true;
       }
     }

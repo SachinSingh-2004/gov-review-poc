@@ -18,31 +18,56 @@ import { StatusChip } from '../components/StatusChip';
 export const Administration: React.FC = () => {
   const [tab, setTab] = useState(0);
 
-  const { data: users, isLoading: loadingUsers } = useQuery<User[]>({
+  const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
     queryKey: ['admin-users'],
-    queryFn: async () => (await api.get('/users')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/users');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: roles, isLoading: loadingRoles } = useQuery<Role[]>({
+  const { data: roles = [], isLoading: loadingRoles } = useQuery<Role[]>({
     queryKey: ['admin-roles'],
-    queryFn: async () => (await api.get('/users/roles')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/users/roles');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: auditLogs, isLoading: loadingLogs } = useQuery<AuditLog[]>({
+  const { data: auditLogs = [], isLoading: loadingLogs } = useQuery<AuditLog[]>({
     queryKey: ['admin-audit-logs'],
-    queryFn: async () => (await api.get('/admin/audit-logs')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/admin/audit-logs');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const userColumns: Column<User>[] = [
     { id: 'username', label: 'Username', minWidth: 120 },
-    { id: 'full_name', label: 'Full Name', minWidth: 180 },
+    { id: 'full_name', label: 'Full Name', minWidth: 180, format: (val, row) => val || (row as any)?.display_name || row?.username || 'User' },
     { id: 'email', label: 'Email', minWidth: 200 },
     { id: 'department', label: 'Department', minWidth: 150 },
     {
       id: 'roles',
       label: 'Assigned Role',
       minWidth: 140,
-      format: (val: Role[]) => (val && val.length > 0 ? <Chip label={val[0].name} color="primary" size="small" /> : <Chip label="None" size="small" />),
+      format: (val: any[]) => {
+        const firstRole = Array.isArray(val) && val.length > 0 ? val[0] : null;
+        const roleLabel = firstRole ? (firstRole.name || firstRole.role_code || firstRole.role_name || 'Assigned') : 'None';
+        return <Chip label={roleLabel} color="primary" size="small" />;
+      },
     },
     { id: 'is_active', label: 'Status', minWidth: 100, format: (val) => (val ? <StatusChip status="HEALTHY" /> : <StatusChip status="AT_RISK" />) },
   ];

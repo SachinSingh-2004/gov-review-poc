@@ -256,14 +256,14 @@ export const MainLayout: React.FC = () => {
             {/* Current User Info */}
             <Box display="flex" alignItems="center" gap={1}>
               <Avatar sx={{ bgcolor: '#0f172a', width: 36, height: 36, fontSize: '0.9rem', fontWeight: 700 }}>
-                {user ? user.full_name.charAt(0) : 'A'}
+                {(user?.full_name || user?.username || 'A').charAt(0).toUpperCase()}
               </Avatar>
               <Box display={{ xs: 'none', md: 'block' }}>
                 <Typography variant="body2" fontWeight={600} color="#0f172a" lineHeight={1.2}>
-                  {user ? user.full_name : 'System Admin'}
+                  {user?.full_name || user?.username || 'System Admin'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {user ? user.department : 'Governance'}
+                  {user?.department || 'Governance & Quality'}
                 </Typography>
               </Box>
             </Box>

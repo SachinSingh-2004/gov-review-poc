@@ -49,19 +49,40 @@ export const Findings: React.FC = () => {
     status: 'OPEN',
   });
 
-  const { data: findings, isLoading } = useQuery<Finding[]>({
+  const { data: findings = [], isLoading } = useQuery<Finding[]>({
     queryKey: ['findings'],
-    queryFn: async () => (await api.get('/findings')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/findings');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: audits } = useQuery<Audit[]>({
+  const { data: audits = [] } = useQuery<Audit[]>({
     queryKey: ['audits'],
-    queryFn: async () => (await api.get('/audits')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/audits');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: users } = useQuery<User[]>({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ['users'],
-    queryFn: async () => (await api.get('/users')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/users');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const createMutation = useMutation({
@@ -90,7 +111,8 @@ export const Findings: React.FC = () => {
     createMutation.mutate(formData);
   };
 
-  const filteredFindings = (findings || []).filter((f) => {
+  const filteredFindings = (Array.isArray(findings) ? findings : []).filter((f) => {
+    if (!f) return false;
     if (severityFilter !== 'ALL' && f.severity !== severityFilter) return false;
     if (statusFilter !== 'ALL' && f.status !== statusFilter) return false;
     return true;

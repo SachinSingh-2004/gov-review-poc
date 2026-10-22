@@ -22,9 +22,16 @@ import { StatusChip } from '../components/StatusChip';
 export const Projects: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string | false>(false);
 
-  const { data: projects, isLoading } = useQuery<Project[]>({
+  const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ['projects'],
-    queryFn: async () => (await api.get('/projects')).data,
+    queryFn: async () => {
+      try {
+        const res = await api.get('/projects');
+        return Array.isArray(res.data) ? res.data : [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const columns: Column<Project>[] = [
@@ -48,7 +55,7 @@ export const Projects: React.FC = () => {
       <Paper sx={{ p: 2.5, mb: 3 }}>
         <DataTable
           columns={columns}
-          rows={projects || []}
+          rows={Array.isArray(projects) ? projects : []}
           loading={isLoading}
           onRowClick={(row) => setExpandedId(expandedId === row.id ? false : row.id)}
         />
@@ -59,7 +66,7 @@ export const Projects: React.FC = () => {
         Project Risk & Milestone Details
       </Typography>
 
-      {projects?.map((proj) => (
+      {Array.isArray(projects) && projects.map((proj) => (
         <Accordion
           key={proj.id}
           expanded={expandedId === proj.id}
