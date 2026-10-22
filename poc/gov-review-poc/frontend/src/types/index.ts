@@ -1,98 +1,247 @@
+export type UserRole = 
+  | 'ADMIN'
+  | 'AUDITOR'
+  | 'AUDIT_MANAGER'
+  | 'PROJECT_OWNER'
+  | 'ACTION_OWNER'
+  | 'EXECUTIVE'
+  | 'VIEWER';
+
+export interface Permission {
+  id: string;
+  code: string;
+  description?: string;
+}
+
 export interface Role {
-  role_id: number;
-  role_code: 'PM' | 'TL';
-  role_name: string;
+  id: string;
+  name: UserRole;
+  description?: string;
+  permissions: Permission[];
 }
 
 export interface User {
-  user_id: number;
-  display_name: string;
-  email: string;
+  id: string;
   username: string;
+  email: string;
+  full_name: string;
+  department: string;
+  is_active: boolean;
   roles: Role[];
+  created_at: string;
+}
+
+export interface Persona {
+  role: UserRole;
+  description: string;
+  username: string;
+  full_name: string;
+  email: string;
+  department: string;
 }
 
 export interface Project {
-  project_id: number;
-  project_code: string;
-  project_name: string;
-}
-
-export interface ProjectHealth {
-  project_health_id: number;
-  governance_review_id: number;
-  schedule_health: 'GREEN' | 'AMBER' | 'RED';
-  budget_status: 'GREEN' | 'AMBER' | 'RED';
-  open_risk_count: number;
-  open_finding_count: number;
-  overall_health: 'GREEN' | 'AMBER' | 'RED';
-}
-
-export interface TechnicalAssessment {
-  technical_assessment_id: number;
-  governance_review_id: number;
-  technical_readiness_score: number; // 1-5
-  technical_health: 'GREEN' | 'AMBER' | 'RED';
-  comments?: string;
-  assessed_by: number;
-  assessed_at: string;
-  assessor?: User;
-}
-
-export interface Action {
-  action_id: number;
-  finding_id: number;
-  description: string;
-  owner_id: number;
-  status: string;
-  due_date: string;
-  owner?: User;
-}
-
-export interface Finding {
-  finding_id: number;
-  audit_id: number;
-  finding_reference: string;
-  title: string;
-  severity: 'CRITICAL' | 'MAJOR' | 'MINOR';
-  status: 'OPEN' | 'CLOSED';
-  actions: Action[];
-}
-
-export interface Audit {
-  audit_id: number;
-  project_id: number;
-  audit_name: string;
-  audit_type: string;
-  audit_status: string;
-  planned_date: string;
-  actual_date?: string;
-  findings: Finding[];
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  owner_id: string;
+  owner_name?: string;
+  health_status: 'HEALTHY' | 'ATTENTION' | 'AT_RISK';
+  created_at: string;
+  updated_at: string;
+  campaign_count?: number;
+  open_findings_count?: number;
+  critical_findings_count?: number;
+  overdue_actions_count?: number;
+  risks?: Risk[];
+  milestones?: Milestone[];
 }
 
 export interface Risk {
-  risk_id: number;
-  project_id: number;
+  id: string;
+  project_id: string;
   title: string;
+  risk_level: 'HIGH' | 'MEDIUM' | 'LOW';
+  mitigation_plan?: string;
   status: string;
-  impact: 'HIGH' | 'MEDIUM' | 'LOW';
-  probability: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
-export interface GovernanceReview {
-  governance_review_id: number;
-  project_id: number;
-  review_number: string;
-  review_date: string;
-  review_status: string;
-  project?: Project;
-  project_health?: ProjectHealth;
-  technical_assessment?: TechnicalAssessment;
+export interface Milestone {
+  id: string;
+  project_id: string;
+  title: string;
+  target_date: string;
+  status: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED';
 }
 
-export interface LoginResponse {
-  user: User;
-  role_code: 'PM' | 'TL';
-  assigned_project_id: number;
-  token: string;
+export interface Campaign {
+  id: string;
+  code: string;
+  name: string;
+  project_id: string;
+  project_name?: string;
+  description?: string;
+  owner_id: string;
+  owner_name?: string;
+  start_date: string;
+  end_date: string;
+  status: 'DRAFT' | 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  created_by: string;
+  creator_name?: string;
+  created_at: string;
+  updated_at: string;
+  audit_count?: number;
+}
+
+export type AuditType = 'PROCESS' | 'DESIGN_CONTROL' | 'SOFTWARE_SAFETY' | 'CYBERSECURITY' | 'VENDOR';
+export type RecurrencePattern = 'NONE' | 'QUARTERLY' | 'SEMI_ANNUAL' | 'ANNUAL';
+
+export interface Audit {
+  id: string;
+  code: string;
+  title: string;
+  campaign_id: string;
+  campaign_name?: string;
+  project_id?: string;
+  project_name?: string;
+  lead_auditor_id: string;
+  lead_auditor_name?: string;
+  lead_auditor_email?: string;
+  start_date: string;
+  end_date: string;
+  status: 'PLANNED' | 'IN_PROGRESS' | 'FIELDWORK' | 'ATTENTION' | 'CLOSED';
+  audit_type?: AuditType;
+  recurrence_pattern?: RecurrencePattern;
+  scope_description?: string;
+  estimated_hours?: number;
+  milestone_id?: string;
+  milestone_title?: string;
+  closure_percentage: number;
+  created_at: string;
+  updated_at: string;
+  finding_count?: number;
+}
+
+export interface AuditConflictCheckResponse {
+  has_conflict: boolean;
+  conflict_count: number;
+  overlapping_audits: Array<{
+    id: string;
+    code: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+  }>;
+  message: string;
+}
+
+export interface Attachment {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  uploaded_by_id: string;
+  uploaded_by_name?: string;
+  uploaded_at: string;
+}
+
+export interface Finding {
+  id: string;
+  code: string;
+  audit_id: string;
+  audit_title?: string;
+  campaign_id?: string;
+  campaign_name?: string;
+  project_id?: string;
+  project_name?: string;
+  title: string;
+  description?: string;
+  severity: 'CRITICAL' | 'MAJOR' | 'MINOR';
+  status: 'OPEN' | 'IN_PROGRESS' | 'PENDING_REVIEW' | 'CLOSED';
+  owner_id: string;
+  owner_name?: string;
+  due_date: string;
+  closure_info?: string;
+  created_at: string;
+  updated_at: string;
+  action_count?: number;
+  attachments?: Attachment[];
+  attachment_count?: number;
+}
+
+export interface ActionItem {
+  id: string;
+  code: string;
+  finding_id: string;
+  finding_title?: string;
+  audit_id?: string;
+  project_id?: string;
+  project_name?: string;
+  description: string;
+  owner_id: string;
+  owner_name?: string;
+  due_date: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'OVERDUE' | 'PENDING_REVIEW' | 'CLOSED';
+  completion_date?: string;
+  evidence_summary?: string;
+  reviewer_id?: string;
+  reviewer_name?: string;
+  created_at: string;
+  updated_at: string;
+  attachments?: Attachment[];
+  attachment_count?: number;
+}
+
+export interface AuditLog {
+  id: string;
+  user_id: string;
+  username: string;
+  full_name: string;
+  action_type: string;
+  entity_type: string;
+  entity_id: string;
+  details_json?: string;
+  timestamp: string;
+}
+
+export interface DashboardSummary {
+  kpis: {
+    upcoming_audits: number;
+    open_findings: number;
+    critical_findings: number;
+    overdue_actions: number;
+    closed_findings: number;
+  };
+  findings_by_severity: {
+    critical: number;
+    major: number;
+    minor: number;
+    total: number;
+  };
+  findings_by_project: Array<{ project_name: string; count: number }>;
+  closure_trend: Array<{ month: string; closure_rate: number; planned_rate: number }>;
+}
+
+export interface PortfolioSummary {
+  total_projects: number;
+  healthy_projects: number;
+  attention_projects: number;
+  at_risk_projects: number;
+  open_findings: number;
+  critical_findings: number;
+  overdue_actions: number;
+  audit_completion_rate: number;
+}
+
+export interface ExecutiveSummary {
+  overall_governance_score: number;
+  audit_status_distribution: Record<string, number>;
+  finding_severity_distribution: Record<string, number>;
+  project_health_distribution: Record<string, number>;
+  high_priority_items_count: number;
+  action_closure_rate: number;
 }

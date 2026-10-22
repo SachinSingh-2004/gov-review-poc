@@ -13,32 +13,113 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const DEFAULT_DEMO_PERSONAS: Persona[] = [
+  {
+    role: 'ADMIN',
+    description: 'Full System Administrator',
+    username: 'admin',
+    full_name: 'System Administrator',
+    email: 'admin@rdgov.local',
+    department: 'Governance & Quality',
+  },
+  {
+    role: 'AUDITOR',
+    description: 'Conducts audits and logs findings',
+    username: 'auditor_jane',
+    full_name: 'Jane Auditor',
+    email: 'jane.auditor@rdgov.local',
+    department: 'Independent Audit',
+  },
+  {
+    role: 'AUDIT_MANAGER',
+    description: 'Approves audits, assigns actions',
+    username: 'audit_mgr_mark',
+    full_name: 'Mark Manager',
+    email: 'mark.mgr@rdgov.local',
+    department: 'Audit Operations',
+  },
+  {
+    role: 'PROJECT_OWNER',
+    description: 'Manages projects and mitigations',
+    username: 'proj_owner_sarah',
+    full_name: 'Sarah Project Lead',
+    email: 'sarah.lead@rdgov.local',
+    department: 'Advanced Robotics R&D',
+  },
+  {
+    role: 'ACTION_OWNER',
+    description: 'Executes corrective actions',
+    username: 'action_owner_alex',
+    full_name: 'Alex Engineer',
+    email: 'alex.eng@rdgov.local',
+    department: 'Software Engineering',
+  },
+  {
+    role: 'EXECUTIVE',
+    description: 'Executive review & compliance',
+    username: 'executive_david',
+    full_name: 'David VP',
+    email: 'david.vp@rdgov.local',
+    department: 'Executive Board',
+  },
+  {
+    role: 'VIEWER',
+    description: 'Read-only access',
+    username: 'viewer_sam',
+    full_name: 'Sam Analyst',
+    email: 'sam.analyst@rdgov.local',
+    department: 'Compliance',
+  },
+];
+
+const createFallbackUser = (role: UserRole): User => {
+  const p = DEFAULT_DEMO_PERSONAS.find((item) => item.role === role) || DEFAULT_DEMO_PERSONAS[0];
+  return {
+    id: `user-${p.role.toLowerCase()}`,
+    username: p.username,
+    full_name: p.full_name,
+    email: p.email,
+    department: p.department,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    roles: [
+      {
+        id: `role-${p.role.toLowerCase()}`,
+        name: p.role,
+        description: p.description,
+        permissions: [{ id: 'p-all', code: 'ALL', description: 'All Permissions' }],
+      },
+    ],
+  };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [currentRole, setCurrentRole] = useState<UserRole>(
     (localStorage.getItem('persona_role') as UserRole) || 'ADMIN'
   );
-  const [personas, setPersonas] = useState<Persona[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(() => createFallbackUser(currentRole));
+  const [personas, setPersonas] = useState<Persona[]>(DEFAULT_DEMO_PERSONAS);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchPersonas = async () => {
     try {
       const res = await api.get('/auth/personas');
-      setPersonas(res.data);
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        setPersonas(res.data);
+      }
     } catch (err) {
-      console.error('Failed to load demo personas', err);
+      console.warn('Backend unavailable, using default demo personas');
     }
   };
 
   const fetchCurrentUser = async () => {
-    setIsLoading(true);
     try {
       const res = await api.get('/auth/me');
-      setUser(res.data);
+      if (res.data && res.data.username) {
+        setUser(res.data);
+      }
     } catch (err) {
-      console.error('Failed to fetch user', err);
-    } finally {
-      setIsLoading(false);
+      setUser(createFallbackUser(currentRole));
     }
   };
 

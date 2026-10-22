@@ -1,65 +1,69 @@
-// Governance Review POC Application
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { LoginPage } from './pages/LoginPage';
-import { GovernanceReviewHome } from './pages/GovernanceReviewHome';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    background: {
-      default: '#0f172a',
-      paper: '#1e293b',
+import { theme } from './theme/theme';
+import { AuthProvider } from './context/AuthContext';
+import { MainLayout } from './layouts/MainLayout';
+
+import { Home } from './pages/Home';
+import { AuditDashboard } from './pages/AuditDashboard';
+import { Audits } from './pages/Audits';
+import { Findings } from './pages/Findings';
+import { ActionCentre } from './pages/ActionCentre';
+import { Projects } from './pages/Projects';
+import { Campaigns } from './pages/Campaigns';
+import { PortfolioDashboard } from './pages/PortfolioDashboard';
+import { AutonomousDashboard } from './pages/AutonomousDashboard';
+import { ExecutiveReview } from './pages/ExecutiveReview';
+import { Reports } from './pages/Reports';
+import { Administration } from './pages/Administration';
+import { GovernanceReviewHome } from './pages/GovernanceReviewHome';
+import { LoginPage } from './pages/LoginPage';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      staleTime: 5000,
     },
-    primary: {
-      main: '#0284c7',
-    },
-    secondary: {
-      main: '#38bdf8',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", sans-serif',
   },
 });
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
-
-  if (loading) {
-    return <Box p={4} sx={{ color: '#94a3b8' }}>Loading session...</Box>;
-  }
-
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 export const App: React.FC = () => {
   return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <GovernanceReviewHome />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Login and POC routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/poc" element={<GovernanceReviewHome />} />
+
+              {/* Full Governance Portal (Default) */}
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Home />} />
+                <Route path="audit-dashboard" element={<AuditDashboard />} />
+                <Route path="audits" element={<Audits />} />
+                <Route path="findings" element={<Findings />} />
+                <Route path="actions" element={<ActionCentre />} />
+                <Route path="projects" element={<Projects />} />
+                <Route path="campaigns" element={<Campaigns />} />
+                <Route path="portfolio" element={<PortfolioDashboard />} />
+                <Route path="autonomous" element={<AutonomousDashboard />} />
+                <Route path="executive" element={<ExecutiveReview />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="administration" element={<Administration />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 

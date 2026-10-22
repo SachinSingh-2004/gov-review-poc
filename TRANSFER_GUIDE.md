@@ -42,13 +42,13 @@ Make sure the target PC has:
 
 ## 🚀 Step 2: Setup & Run on New PC
 
-### A. Backend Setup & Run (Terminal 1)
+### A. Full Backend Setup & Run (Terminal 1)
 
 Open PowerShell / Terminal on the new PC:
 
 ```powershell
-# 1. Navigate to backend directory
-cd Audit_demo\poc\gov-review-poc\backend
+# 1. Navigate to main backend directory
+cd Audit_demo\backend
 
 # 2. Create Python virtual environment
 python -m venv venv
@@ -64,46 +64,56 @@ source venv/bin/activate
 # 4. Install backend dependencies
 pip install -r requirements.txt
 
-# 5. Seed the database
-cd ..\seed
-..\backend\venv\Scripts\python.exe seed_demo_data.py
+# 5. Initialize the central SQLite/MySQL database
+cd ..\database
+..\backend\venv\Scripts\python.exe init_db.py
 
-# 6. Start the Backend API Server
+# 6. Start the Full Backend API Server (Port 8000)
 cd ..\backend
-..\venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8005
+..\venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
 ```
 
-*Backend API will be running at:* `http://127.0.0.1:8005` (Docs: `http://127.0.0.1:8005/docs`)
+*Full Backend API will be running at:* `http://127.0.0.1:8000` (Docs: `http://127.0.0.1:8000/docs`)
 
 ---
 
-### B. Frontend Setup & Run (Terminal 2)
+### B. Full Frontend Setup & Run (Terminal 2)
 
 Open a **second terminal** window on the new PC:
 
 ```powershell
-# 1. Navigate to frontend directory
-cd Audit_demo\poc\gov-review-poc\frontend
+# 1. Navigate to root or frontend directory
+cd Audit_demo
 
-# 2. Install npm packages
-npm install
-
-# 3. Start Frontend dev server
+# 2. Install dependencies & start
 npm run dev
+# OR:
+# cd frontend
+# npm install
+# npm run dev
 ```
 
-*Frontend App will be running at:* `http://localhost:5173` (or `http://localhost:5174`)
+*Full Frontend Portal will open at:* `http://localhost:5173`
 
 ---
 
-## 🔑 Login Credentials for Demo
+## 🔑 Demo Personas & Roles
 
-Once the browser opens `http://localhost:5173`:
+In the top navigation bar, use the **Persona Switcher** to seamlessly switch between full roles with active RBAC permissions:
 
-- **Project Manager (PM):**
-  - Username: `pm.demo`
-  - Password: `PM@123`
+- **System Administrator (ADMIN):** Full permissions, administration, system audit logs (`admin`)
+- **Independent Auditor (AUDITOR):** Conducts audits, logs findings (`auditor_jane`)
+- **Audit Manager (AUDIT_MANAGER):** Approves audits, assigns actions (`audit_mgr_mark`)
+- **Project Lead (PROJECT_OWNER):** Manages project compliance, risks, and milestones (`proj_owner_sarah`)
+- **Action Owner (ACTION_OWNER):** Executes corrective remediations & uploads evidence (`action_owner_alex`)
+- **Executive Board VP (EXECUTIVE):** Executive review, governance health score, board reports (`executive_david`)
+- **Compliance Viewer (VIEWER):** Read-only governance analytics (`viewer_sam`)
 
-- **Technical Lead (TL):**
-  - Username: `tl.demo`
-  - Password: `TL@123`
+---
+
+## 🌐 Cloud Deployment (Vercel)
+
+The full functionalities frontend is configured for instant Vercel deployment:
+- **Root Directory in Vercel:** Supported as `./` (Root), `frontend`, or `poc/gov-review-poc/frontend`.
+- **API Rewrites:** Automated via `vercel.json` routing `/api/*` to the production backend.
+

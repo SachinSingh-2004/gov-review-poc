@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+const getBaseUrl = () => {
+  const metaEnv = (import.meta as any).env;
+  if (metaEnv && metaEnv.VITE_API_URL) {
+    return metaEnv.VITE_API_URL;
+  }
+  return '/api';
+};
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -18,3 +26,4 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
